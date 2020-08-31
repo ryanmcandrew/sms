@@ -1,27 +1,55 @@
-// author:ryanmcandrew & the web
+// author:ryanmcandrew & the web & docs
 //
 
 const https = require('https');
 const fs = require("fs");
+const needle = require('needle');
+const log4js = require('log4js');
+const logger = log4js.getLogger();
 
-const options = {
-    hostname: 'api.twitter.com',
-    port: 443,
-    path: 'labs/2/tweets/search?query=caturday%20has:images%20-is:retweet&tweet.fields=created_at,author_id,lang',
-    method: 'GET',
-    headers: `Bearer ${process.env.BEARER_TOKEN}`,
-    key: fs.readFileSync('certs/94872247_ryanmcandrew.net.key'),
-    cert: fs.readFileSync('certs/94872247_ryanmcandrew.net.cert')
-  };
+module.exports.tmp = httpCall;
+module.exports.getRequest = getRequest;
 
-options.agent = new https.Agent(options);
+async function getRequest( url ) {
+    const parameters = {
+        "ids": "1290995618224254983"
+    };
 
-function tmp() {
+    const commResult = await needle('get', url, parameters, { headers: {
+        "authorization": `Bearer ${process.env.BEARER_TOKEN}`
+    }})
+
+    try 
+    {
+        if (commResult) {
+            logger.info("sending msg: " + commResult);
+            return commResult;
+        } 
+        else {
+            throw new Error("Get request communication failure");
+        }
+    }
+    catch (e) {
+        logger.error("Bad GET request");
+    }
+}
+
+function httpCall() {
+    options.agent = new https.Agent(options);
+    const options = {
+        hostname: 'api.twitter.com',
+        port: 443,
+        method: 'GET',
+        path: "?ids=1278747501642657792",
+        headers: `Authorization: Bearer ${process.env.BEARER_TOKEN}`
+      };
+
     const req = https.request(options, (res) => {
-        console.log('statusCode:', res.statusCode);
-        console.log('headers:', res.headers);
+        // console.log('statusCode:', res.statusCode);
+        // console.log('headers:', res.headers);
         
         res.on('data', (d) => {
+            process.stdout.write("got data:\n");
                 process.stdout.write(d);
             });
     });
@@ -32,4 +60,3 @@ function tmp() {
     req.end();
 }
 
-module.exports.tmp = tmp;
