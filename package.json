@@ -13,7 +13,10 @@
     "electron": "^9.2.1"
   },
   "dependencies": {
+    "@tensorflow/tfjs": "^2.3.0",
+    "@tensorflow/tfjs-node": "^2.3.0",
     "cross-env": "^7.0.2",
+    "express": "^4.17.1",
     "log4js": "^6.3.0",
     "needle": "^2.5.0",
     "twitter-autohook": "^1.7.2"
