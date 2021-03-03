@@ -1,1 +1,2 @@
-social data monitoring
+data monitoring?
+Teaching myself nlp... 
