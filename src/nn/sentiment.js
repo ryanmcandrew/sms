@@ -1,9 +1,9 @@
 // accelerated tensorflow is not working
 // const tf = require('@tensorflow/tfjs-node');
-const tf = require('@tensorflow/tfjs');
+const sen = require('sentiment');
 
-function tfTest() {
-    console.log(tf);
+function analyzeSent(str) {
+    console.log(sen);
 }
 
 module.exports.tfTest = tfTest;

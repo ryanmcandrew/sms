@@ -1,0 +1,20 @@
+- if tweet.content
+    div.container
+        div.row
+            img.image(src="", alt="", srcset=tweet.imageSrc)
+            div.title = tweet.name
+            div.subtitle = tweet.username
+        div.row
+            div.text = tweet.content
+        div.row
+            div.text = tweet.time
+            div.text = tweet.date
+        div.row
+            img.replyButton(src="", alt="") 
+            img.retweetButton(src="", alt="")
+            img.likeButton(src="", alt="")
+            img.shareButton(src="", alt="")
+ else
+    div.container 
+        div.row
+            div No connection to feed.

@@ -10,15 +10,18 @@
   "author": "Ryan McAndrew",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^9.2.1"
+    "electron": "^9.3.0"
   },
   "dependencies": {
     "@tensorflow/tfjs": "^2.3.0",
     "@tensorflow/tfjs-node": "^2.3.0",
+    "cookie-parser": "^1.4.5",
     "cross-env": "^7.0.2",
     "express": "^4.17.1",
     "log4js": "^6.3.0",
+    "mongodb": "^3.6.2",
     "needle": "^2.5.0",
+    "pug": "^3.0.0",
     "twitter-autohook": "^1.7.2"
   }
 }

@@ -15,7 +15,7 @@ function createWindow () {
       }
     })
 
-    win.loadFile('../data.html');  
+    win.loadFile('../assets/index.html');  
     setProcessRules();
 }
 
@@ -26,9 +26,9 @@ function setProcessRules() {
     var result = processData(data);
 
     result.then(res => {
-      logger.info("sending request result to gui. follows.");
-      logger.info(res.body);
       data = res.body;
+      logger.info("sending request result to gui. follows.");
+      logger.info(res.body.data[0])
       event.sender.send('actionReply', data);
     })
     .catch(err => {
@@ -38,7 +38,9 @@ function setProcessRules() {
 }
 
 function processData(data) {
-  return tsrv.getRequest(data);
+  // logger.info(data);
+  // return tsrv.getTwitterUser();
+  return tsrv.getTweet(data.url, data.parameters);
 }
 
 function display() {

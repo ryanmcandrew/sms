@@ -4,23 +4,26 @@
 const fs = require("fs");
 const http = require('http');
 const https = require('https');
-const needle = require('needle');
 
 const log4js = require('log4js');
 const logger = log4js.getLogger();
 
 const express = require('express');
+const cookieParser = require('cookie-parser');
+const pug = require("pug");
 
-class AppServer {
+const doc = require("../hmi/appDocument.js");
+const scrollPane = require("../hmi/model/tweetScroller.js");
+const lib = require('./util.js')
 
-    host = null;
-    secureHost = null;
-    app = null;
-
+class AppServer 
+{
     constructor() 
     {
         if (this.app == null)
         {
+            logger.info("started new server");
+
             this.app = express();
             var options = {
                 key: fs.readFileSync(`${process.env.APP_CERT_KEY}`),
@@ -30,54 +33,56 @@ class AppServer {
             this.host = http.createServer(this.app).listen(80);
             this.secureHost = https.createServer(options, this.app).listen(443);
 
-            this.app.use(express.static(`${process.env.SERVER_ROOT}`))
+            this.app.use(cookieParser());
 
-            this.app.get('*', (req, res) => {
-                logger.info("received request: " + req.method);
-                res.sendFile(`${process.env.SERVER_ROOT}`);
-            })
+            this.app.use(function(req,res,next) {
+                if ( req.cookies.rrmNoTrack != null ) 
+                {
+                    res.cookie('rrmNoTrack', req.cookies.rrmNoTrack)
+                    logger.info("set cookie" + req.headers.cookie.split(";")[0])
+                }
+                else { 
+                    logger.info('no cookie ' + req.cookies.rrmNoTrack )
+                }
+                next();
+            });
+
+            this.app.use(express.static(`${process.env.SERVER_ROOT}`));
+            
+            this.setRoutes();
         } 
     }
 
-}
-
-module.exports.getRequest = getRequest;
-module.exports.AppServer = AppServer;
-
-async function getRequest( url ) {
-
-    var result = null; 
-
-    const parameters = 
+    setRoutes() 
     {
-        "ids": "1303020794780487682",
-        "tweet.fields" : "attachments,author_id,context_annotations,created_at," +
-                        "entities,geo,id,in_reply_to_user_id,lang,possibly_sensitive,public_metrics," +
-                        "referenced_tweets,source,text,withheld",
-    };
-
-    try 
-    {
-        logger.info("sending get request to: " + url);
-
-        const promiseResult = await needle('get', url, parameters, { 
-            headers:
-            { 
-                "authorization":`Bearer ${process.env.BEARER_TOKEN}`
-            }
+        this.app.get('/', (req, res) => {
+            var dir = `${process.env.SERVER_ROOT}` + "/views/";
+            var d = new doc.appDocument();
+            
+            logger.info("received / request: " + req.method + " " + req.path);
+            d.add("\t\tinclude " + dir + "homeBody.pug\n");
+            
+            res.send(d.rend());
         });
 
-        if (promiseResult) 
-        {
-            return promiseResult;
-        }
-        else 
-        {
-            throw new Error("get comm error");
-        }
-    }
-    catch (e) 
-    {
-        logger.error("Bad GET request: " + e);
+        this.app.get('/sma', (req, res) => {
+            var dir = `${process.env.SERVER_ROOT}` + "/views/";
+            var d = new scrollPane.tweetScroller();
+
+            logger.info("received / request: " + req.method + " " + req.path);
+            d.load().then( r => {
+                res.send(d.rend());
+            })
+
+        });
+
+        this.app.get('*', (req, res) => {
+            logger.info("received * request: " + req.method + " " + req.path);
+            var dir = `${process.env.SERVER_ROOT}`+"/views/404.pug";
+            var body = pug.renderFile(dir, {});
+            res.send(body);
+        });
     }
 }
+
+module.exports.AppServer = AppServer;
